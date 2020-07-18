@@ -4,34 +4,32 @@ provider "aws" {
   profile = var.aws_profile
 }
 
-
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "2.21.0"
-
-  name = var.vpc_name
-  cidr = var.vpc_cidr
-
-  azs             = var.vpc_azs
-  private_subnets = var.vpc_private_subnets
-  public_subnets  = var.vpc_public_subnets
-
-  enable_nat_gateway = var.vpc_enable_nat_gateway
-
-  tags = var.vpc_tags
+resource "aws_key_pair" "property-key" {
+  key_name   = "property-key"
+  public_key = file("~/.ssh/property.pub")
 }
 
-module "ec2_instances" {
-  source  = "terraform-aws-modules/ec2-instance/aws"
-  version = "2.12.0"
+resource "aws_network_interface" "property-network-interface" {
+  subnet_id   = "subnet-55f6720c"
+  security_groups = ["sg-05fdea77"]
 
-  name           = "infra-prop-ec2-cluster"
-  instance_count = 1
+  tags = {
+    Name = "property-network-interface"
+  }
+}
 
+resource "aws_instance" "property-ec2" {
+  key_name = aws_key_pair.property-key.key_name
   ami                    = var.ec2_ami
   instance_type          = var.ec2_instance_type
-  vpc_security_group_ids = [module.vpc.default_security_group_id]
-  subnet_id              = module.vpc.public_subnets[0]
 
   tags = var.ec2_tags
+
+  user_data = file("install_docker.sh")
+
+  network_interface {
+    network_interface_id = aws_network_interface.property-network-interface.id
+    device_index         = 0
+  }
+
 }
