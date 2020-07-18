@@ -30,3 +30,7 @@ variable "ec2_tags" {
     Environment = "dev"
   }
 }
+
+variable "subnet_id" {
+  default = "subnet-55f6720c"
+}
