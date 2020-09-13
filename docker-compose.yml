@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_data:/data/db
+      - monog_config:/data/configdb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: p@ssw0rd
+
+  portainer:
+    image: portainer/portainer
+    restart: always
+    ports:
+      - 8082:8081
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+volumes:
+  portainer_data:
+  mongo_data:
+  monog_config:
+
+networks:
+  overlay:
